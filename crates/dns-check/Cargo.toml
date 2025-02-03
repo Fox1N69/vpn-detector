@@ -1,0 +1,18 @@
+[package]
+name = "dns-check"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.32", features = ["full"] }
+trust-dns-proto = "0.23"
+trust-dns-resolver = { version = "0.23", features = ["dns-over-rustls"] }
+thiserror = "2.0"
+async-trait = "0.1.72"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "dns-check"
+path = "src/main.rs"

@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = [ "crates/config",
+    "crates/core",
+    "crates/detector",
+    "crates/dns-check",
+    "crates/geo-ip",
+    "crates/protobuf-api",
+    "crates/config"
+, "crates/header-analyzer", "crates/ttl-check"]
+default-members = ["crates/core"]
+
+[workspace.dependencies]
+core = { path = "crates/core" }
+detector = { path = "crates/detector" }
+dnscheck = { path = "crates/dns-check" }
+geoip = { path = "crates/geo-ip" }
+protobufapi = { path = "crates/protobuf-api" }
+config = { paht = "crates/config"}
+header-analyzer = {path = "header-analyzer"}
+ttl-check = {path = "ttl-check"}
+

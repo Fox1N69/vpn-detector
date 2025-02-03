@@ -1,0 +1,18 @@
+[package]
+name = "geo-ip"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+csv = "1.3"
+thiserror = "2.0"
+lru = "0.13" 
+cidr-utils = "0.6" 
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "geo-ip"
+path = "src/main.rs"

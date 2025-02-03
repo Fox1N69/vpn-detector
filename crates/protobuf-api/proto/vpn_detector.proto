@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vpn_detector;
+
+service VpnDetectorService {
+  rpc CheckIp(CheckIpRequest) returns (CheckIpResponse);
+}
+
+message CheckIpRequest { string ip = 1; }
+
+message CheckIpResponse {
+  string ip = 1;
+  bool is_vpn = 2;
+  float score = 3;
+}

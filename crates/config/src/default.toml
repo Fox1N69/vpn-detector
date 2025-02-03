@@ -1,0 +1,7 @@
+[server]
+host = "0.0.0.0"
+port = 8080
+
+ip_database_path = "assets/vpn_ips.csv"
+vpn_threshold = 0.8
+dns_timeout_sec = 3

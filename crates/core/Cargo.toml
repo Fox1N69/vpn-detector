@@ -1,0 +1,30 @@
+[package]
+name = "vpn-detector-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.42", features = ["full"] }
+tonic = "0.12"
+prost = "0.13"
+config = { path = "../config" }
+geo-ip = { path = "../geo-ip" }
+dns-check = { path = "../dns-check" }
+protobuf-api = { path = "../protobuf-api" }
+detector = {path = "../detector"}
+async-trait = "0.1"
+
+futures = "0.3"
+pin-utils = "0.1"
+
+[build-dependencies]
+tonic-build = "0.12"
+prost-build = "0.13"
+
+[lib]
+proc-macro = true
+path = "src/lib.rs"
+
+[[bin]]
+name = "core"
+path = "src/main.rs"

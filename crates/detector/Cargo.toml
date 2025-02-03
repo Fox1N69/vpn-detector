@@ -1,0 +1,18 @@
+[package]
+name = "detector"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+geo-ip = { path = "../geo-ip" }
+dns-check = { path = "../dns-check" }
+async-trait = "0.1"
+thiserror = "2.0"
+tokio = { version = "1.32", features = ["macros"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "detector"
+path = "src/main.rs"

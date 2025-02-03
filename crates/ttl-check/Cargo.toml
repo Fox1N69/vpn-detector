@@ -1,0 +1,17 @@
+[package]
+name = "ttl-check"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.32", features = ["full", "time", "sync"] }
+pnet = "0.35"
+thiserror = "2.0"
+futures = "0.3"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "ttl-check"
+path = "src/main.rs"

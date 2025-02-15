@@ -51,7 +51,6 @@ impl VpnDetector for VpnDetectorImpl {
         let mut ip_db = self.ip_db.lock().await;
         let ip_check = ip_db.is_vpn_ip(ip);
 
-        // Получаем блокировку для dns_detector
         let dns_detector = self.dns_detector.lock().await;
         let dns_score = dns_detector.check_vpn_patterns(ip).await?;
 

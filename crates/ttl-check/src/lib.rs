@@ -1,6 +1,10 @@
 use pnet::datalink::Channel::Ethernet;
 use pnet::datalink::{self, DataLinkReceiver, NetworkInterface};
 use pnet::packet::ipv4::Ipv4Packet;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 use std::time::Duration;
 use thiserror::Error;
 use tokio::sync::mpsc;
@@ -27,7 +31,7 @@ pub struct TtlDetector {
     interface: NetworkInterface,
     packet_tx: mpsc::Sender<Packet>,
     packet_rx: mpsc::Receiver<Packet>,
-    running: bool,
+    running: Arc<AtomicBool>,
 }
 
 #[derive(Debug)]
@@ -46,46 +50,55 @@ impl TtlDetector {
             interface,
             packet_tx,
             packet_rx,
-            running: false,
+            running: Arc::new(AtomicBool::new(false)),
         })
     }
 
     pub async fn start(&mut self) -> Result<(), TtlError> {
-        if self.running {
+        if self.running.load(Ordering::Relaxed) {
             return Ok(());
         }
 
-        self.running = true;
+        self.running.store(true, Ordering::Relaxed);
         let tx = self.packet_tx.clone();
+        let running_flag = self.running.clone();
 
         task::spawn_blocking(move || {
-            let interfaces = datalink::interfaces();
-            let interface = interfaces
+            let interface = datalink::interfaces()
                 .into_iter()
-                .filter(|iface| !iface.is_loopback())
-                .find(|iface| iface.ips.iter().any(|ip| ip.is_ipv4()))
-                .ok_or(TtlError::CaptureError)
-                .unwrap();
+                .find(|iface| !iface.is_loopback() && iface.ips.iter().any(|ip| ip.is_ipv4()));
+
+            let interface = match interface {
+                Some(iface) => iface,
+                None => {
+                    eprintln!("No suitable network interface found");
+                    return;
+                }
+            };
 
             let mut rx: Box<dyn DataLinkReceiver> =
                 match datalink::channel(&interface, Default::default()) {
                     Ok(Ethernet(_, rx)) => rx,
-                    Ok(_) | Err(_) => return,
+                    _ => {
+                        eprintln!("Failed to create datalink channel");
+                        return;
+                    }
                 };
 
-            loop {
+            while running_flag.load(Ordering::Relaxed) {
                 match rx.next() {
                     Ok(packet) => {
                         if let Some(ipv4_packet) = Ipv4Packet::new(packet) {
                             let ttl = ipv4_packet.get_ttl();
                             let packet = Packet { ttl };
-
                             if tx.blocking_send(packet).is_err() {
                                 break;
                             }
                         }
                     }
-                    Err(_) => continue,
+                    Err(_) => {
+                        continue;
+                    }
                 }
             }
         });
@@ -94,11 +107,11 @@ impl TtlDetector {
     }
 
     pub async fn stop(&mut self) {
-        self.running = false;
+        self.running.store(false, Ordering::Relaxed);
     }
 
     pub async fn capture_ttl(&mut self) -> Result<u8, TtlError> {
-        if !self.running {
+        if !self.running.load(Ordering::Relaxed) {
             self.start().await?;
         }
 
@@ -109,7 +122,7 @@ impl TtlDetector {
     }
 
     pub async fn capture_ttl_with_timeout(&mut self, timeout: Duration) -> Result<u8, TtlError> {
-        if !self.running {
+        if !self.running.load(Ordering::Relaxed) {
             self.start().await?;
         }
 

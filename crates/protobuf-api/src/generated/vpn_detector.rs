@@ -20,10 +20,10 @@ pub mod vpn_detector_service_client {
         dead_code,
         missing_docs,
         clippy::wildcard_imports,
-        clippy::let_unit_value,
+        clippy::let_unit_value
     )]
-    use tonic::codegen::*;
     use tonic::codegen::http::Uri;
+    use tonic::codegen::*;
     #[derive(Debug, Clone)]
     pub struct VpnDetectorServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -67,9 +67,8 @@ pub mod vpn_detector_service_client {
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<
-                http::Request<tonic::body::BoxBody>,
-            >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
+            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
+                Into<StdError> + std::marker::Send + std::marker::Sync,
         {
             VpnDetectorServiceClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -107,25 +106,18 @@ pub mod vpn_detector_service_client {
         pub async fn check_ip(
             &mut self,
             request: impl tonic::IntoRequest<super::CheckIpRequest>,
-        ) -> std::result::Result<
-            tonic::Response<super::CheckIpResponse>,
-            tonic::Status,
-        > {
-            self.inner
-                .ready()
-                .await
-                .map_err(|e| {
-                    tonic::Status::unknown(
-                        format!("Service was not ready: {}", e.into()),
-                    )
-                })?;
+        ) -> std::result::Result<tonic::Response<super::CheckIpResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
+            })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/vpn_detector.VpnDetectorService/CheckIp",
-            );
+            let path =
+                http::uri::PathAndQuery::from_static("/vpn_detector.VpnDetectorService/CheckIp");
             let mut req = request.into_request();
-            req.extensions_mut()
-                .insert(GrpcMethod::new("vpn_detector.VpnDetectorService", "CheckIp"));
+            req.extensions_mut().insert(GrpcMethod::new(
+                "vpn_detector.VpnDetectorService",
+                "CheckIp",
+            ));
             self.inner.unary(req, path, codec).await
         }
     }
@@ -137,7 +129,7 @@ pub mod vpn_detector_service_server {
         dead_code,
         missing_docs,
         clippy::wildcard_imports,
-        clippy::let_unit_value,
+        clippy::let_unit_value
     )]
     use tonic::codegen::*;
     /// Generated trait containing gRPC methods that should be implemented for use with VpnDetectorServiceServer.
@@ -169,10 +161,7 @@ pub mod vpn_detector_service_server {
                 max_encoding_message_size: None,
             }
         }
-        pub fn with_interceptor<F>(
-            inner: T,
-            interceptor: F,
-        ) -> InterceptedService<Self, F>
+        pub fn with_interceptor<F>(inner: T, interceptor: F) -> InterceptedService<Self, F>
         where
             F: tonic::service::Interceptor,
         {
@@ -227,15 +216,9 @@ pub mod vpn_detector_service_server {
                 "/vpn_detector.VpnDetectorService/CheckIp" => {
                     #[allow(non_camel_case_types)]
                     struct CheckIpSvc<T: VpnDetectorService>(pub Arc<T>);
-                    impl<
-                        T: VpnDetectorService,
-                    > tonic::server::UnaryService<super::CheckIpRequest>
-                    for CheckIpSvc<T> {
+                    impl<T: VpnDetectorService> tonic::server::UnaryService<super::CheckIpRequest> for CheckIpSvc<T> {
                         type Response = super::CheckIpResponse;
-                        type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
-                            tonic::Status,
-                        >;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::CheckIpRequest>,
@@ -269,23 +252,19 @@ pub mod vpn_detector_service_server {
                     };
                     Box::pin(fut)
                 }
-                _ => {
-                    Box::pin(async move {
-                        let mut response = http::Response::new(empty_body());
-                        let headers = response.headers_mut();
-                        headers
-                            .insert(
-                                tonic::Status::GRPC_STATUS,
-                                (tonic::Code::Unimplemented as i32).into(),
-                            );
-                        headers
-                            .insert(
-                                http::header::CONTENT_TYPE,
-                                tonic::metadata::GRPC_CONTENT_TYPE,
-                            );
-                        Ok(response)
-                    })
-                }
+                _ => Box::pin(async move {
+                    let mut response = http::Response::new(empty_body());
+                    let headers = response.headers_mut();
+                    headers.insert(
+                        tonic::Status::GRPC_STATUS,
+                        (tonic::Code::Unimplemented as i32).into(),
+                    );
+                    headers.insert(
+                        http::header::CONTENT_TYPE,
+                        tonic::metadata::GRPC_CONTENT_TYPE,
+                    );
+                    Ok(response)
+                }),
             }
         }
     }

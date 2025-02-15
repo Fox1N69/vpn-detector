@@ -3,28 +3,36 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum HeaderError {
-    #[error("Suspicious header pattern detected")]
-    SuspiciousHeaders,
+    #[error("Suspicious header(s) detected: {0:?}")]
+    SuspiciousHeaders(Vec<String>),
 }
 
 pub struct HeaderAnalyzer;
 
 impl HeaderAnalyzer {
+    const SUSPICIOUS_HEADERS: &'static [&'static str] = &[
+        "x-forwarded-for",
+        "cf-connecting-ip",
+        "proxy-connection",
+        "via",
+        "x-proxy-id",
+    ];
+
     pub fn analyze(headers: &HeaderMap) -> Result<(), HeaderError> {
-        if headers.contains_key("x-forwarded-for") {
-            return Err(HeaderError::SuspiciousHeaders);
-        }
+        let suspicious: Vec<String> = headers
+            .keys()
+            .filter_map(|name| {
+                let name_lower = name.as_str().to_ascii_lowercase();
+                if Self::SUSPICIOUS_HEADERS.contains(&name_lower.as_str()) {
+                    Some(name_lower)
+                } else {
+                    None
+                }
+            })
+            .collect();
 
-        let first_header = headers.iter().next();
-        if let Some((name, _)) = first_header {
-            if name.as_str() == "cf-connecting-ip" {
-                return Err(HeaderError::SuspiciousHeaders);
-            }
-        }
-
-        let vpn_header = ["proxy-connection", "via", "x-proxy-id"];
-        if headers.keys().any(|h| vpn_header.contains(&h.as_str())) {
-            return Err(HeaderError::SuspiciousHeaders);
+        if !suspicious.is_empty() {
+            return Err(HeaderError::SuspiciousHeaders(suspicious));
         }
 
         Ok(())
